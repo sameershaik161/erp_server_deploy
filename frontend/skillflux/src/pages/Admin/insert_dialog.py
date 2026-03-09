@@ -1,0 +1,153 @@
+import re
+
+# Read the ManageERPs.jsx file
+with open(r'd:\erp_portal\erp_portal\frontend\skillflux\src\pages\Admin\ManageERPs.jsx', 'r', encoding='utf-8') as f:
+    content = f.read()
+
+# The dialog code to insert
+dialog_code = '''
+          {/* Field Selector Dialog */}
+          <Dialog
+            open={openFieldSelector}
+            onClose={handleCloseFieldSelector}
+            maxWidth="md"
+            fullWidth
+          >
+            <DialogTitle sx={{ backgroundColor: '#6366F1', color: 'white', fontWeight: 600 }}>
+              Select Fields to Export
+            </DialogTitle>
+            <DialogContent sx={{ mt: 2 }}>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Choose which fields you want to include in the CSV export. Selected fields: {Object.values(selectedFields).filter(Boolean).length}
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={handleSelectAllFields}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Select All
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={handleDeselectAllFields}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Deselect All
+                  </Button>
+                  {['Basic Information', 'Personal Details', 'Family Details', 'Academic Performance', 'Pre-BTech Education', 'Financial Information', 'Training & Development', 'Skills & Certifications', 'Accommodation', 'Status & Verification', 'Timestamps'].map(category => (
+                    <Button
+                      key={category}
+                      size="small"
+                      variant="text"
+                      onClick={() => handleSelectCategory(category)}
+                      sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+                    >
+                      {category}
+                    </Button>
+                  ))}
+                </Box>
+              </Box>
+
+              {['Basic Information', 'Personal Details', 'Family Details', 'Academic Performance', 'Pre-BTech Education', 'Financial Information', 'Training & Development', 'Skills & Certifications', 'Accommodation', 'Status & Verification', 'Timestamps'].map(category => {
+                const categoryFields = availableFields.filter(f => f.category === category);
+                return (
+                  <Box key={category} sx={{ mb: 3 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: '#6366F1' }}>
+                      {category}
+                    </Typography>
+                    <Grid container spacing={1}>
+                      {categoryFields.map(field => (
+                        <Grid item xs={6} sm={4} md={3} key={field.key}>
+                          <Box
+                            onClick={() => handleFieldToggle(field.key)}
+                            sx={{
+                              p: 1,
+                              border: '1px solid #E5E7EB',
+                              borderRadius: 1,
+                              cursor: 'pointer',
+                              backgroundColor: selectedFields[field.key] ? '#EEF2FF' : 'white',
+                              borderColor: selectedFields[field.key] ? '#6366F1' : '#E5E7EB',
+                              '&:hover': {
+                                backgroundColor: selectedFields[field.key] ? '#E0E7FF' : '#F9FAFB'
+                              },
+                              transition: 'all 0.2s'
+                            }}
+                          >
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box
+                                sx={{
+                                  width: 16,
+                                  height: 16,
+                                  border: '2px solid',
+                                  borderColor: selectedFields[field.key] ? '#6366F1' : '#D1D5DB',
+                                  borderRadius: '4px',
+                                  backgroundColor: selectedFields[field.key] ? '#6366F1' : 'white',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0
+                                }}
+                              >
+                                {selectedFields[field.key] && (
+                                  <CheckCircle sx={{ width: 12, height: 12, color: 'white' }} />
+                                )}
+                              </Box>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  fontSize: '0.875rem',
+                                  color: selectedFields[field.key] ? '#6366F1' : '#6B7280',
+                                  fontWeight: selectedFields[field.key] ? 600 : 400
+                                }}
+                              >
+                                {field.label}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Box>
+                );
+              })}
+            </DialogContent>
+            <DialogActions sx={{ p: 2, gap: 1 }}>
+              <Button
+                onClick={handleCloseFieldSelector}
+                variant="outlined"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleExportCSV}
+                variant="contained"
+                startIcon={<Download className="w-4 h-4" />}
+                disabled={Object.values(selectedFields).filter(Boolean).length === 0}
+                sx={{
+                  backgroundColor: '#10B981',
+                  '&:hover': { backgroundColor: '#059669' }
+                }}
+              >
+                Download CSV ({Object.values(selectedFields).filter(Boolean).length} fields)
+              </Button>
+            </DialogActions>
+          </Dialog>
+'''
+
+# Find the location to insert (before </motion.div>)
+# Look for the pattern of closing Dialog tag followed by closing motion.div
+pattern = r'(</Dialog>\r?\n\s*)(</motion\.div>)'
+replacement = r'\1' + dialog_code + r'\n\2'
+
+# Replace
+new_content = re.sub(pattern, replacement, content)
+
+# Write back
+with open(r'd:\erp_portal\erp_portal\frontend\skillflux\src\pages\Admin\ManageERPs.jsx', 'w', encoding='utf-8') as f:
+    f.write(new_content)
+
+print("Field selector dialog added successfully!")

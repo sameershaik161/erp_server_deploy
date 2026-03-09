@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: student-erp-portal-backend
+    env: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    autoDeploy: true
+    healthCheckPath: /api/health
+
+  - type: static_site
+    name: student-erp-portal-frontend
+    rootDir: frontend/skillflux
+    plan: free
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    autoDeploy: true
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
