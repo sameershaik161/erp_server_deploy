@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import mongoSanitize from "express-mongo-sanitize";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -22,6 +23,9 @@ const app = express();
 app.use(express.json({ limit: '50mb' }));
 // allow form-data (multer handles files)
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize());
 
 // CORS configuration for AWS deployment
 const allowedOrigins = [
