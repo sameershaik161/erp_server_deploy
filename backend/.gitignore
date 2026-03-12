@@ -3,9 +3,6 @@ node_modules/
 .pnp/
 .pnp.js
 
-# Important: DO NOT ignore the api/ folder - it's needed for Vercel deployment
-# !api/
-
 # Environment variables (IMPORTANT: Never commit .env files)
 .env
 .env.local
@@ -53,14 +50,11 @@ Thumbs.db
 *.sublime-project
 *.sublime-workspace
 
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Optional REPL history
-.node_repl_history
+# AWS-specific deployment files (not needed for Render)
+.ebextensions/
+.platform/
+package.aws.json
+.vercelignore
 
 # Runtime data
 *.pid
@@ -72,8 +66,3 @@ build/Release
 
 # TypeScript cache
 *.tsbuildinfo
-
-# Optional: Uncomment if you don't want to track lock files
-# package-lock.json
-# yarn.lock
-# pnpm-lock.yaml
