@@ -26,7 +26,7 @@ import "react-toastify/dist/ReactToastify.css";
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/skillflux">
         <Navbar />
         <Routes>
           <Route path="/" element={<Landing />} />
