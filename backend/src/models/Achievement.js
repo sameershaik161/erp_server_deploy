@@ -52,4 +52,8 @@ const achievementSchema = new mongoose.Schema({
   date: { type: Date }, // Keep for existing data
 }, { timestamps: true });
 
+// Add Indexes for performance
+achievementSchema.index({ student: 1, status: 1 });
+achievementSchema.index({ status: 1, createdAt: -1 });
+
 export default mongoose.model("Achievement", achievementSchema);

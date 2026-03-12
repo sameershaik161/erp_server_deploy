@@ -1,14 +1,16 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { catchAsync } from "../utils/catchAsync.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
-export async function register(req, res) {
-  try {
+export const register = catchAsync(async (req, res) => {
     const { name, email, rollNumber, password, department, section, year, admissionYear } = req.body;
     
     // Check for missing fields
     if (!name || !email || !rollNumber || !password || !department || !section || !year || !admissionYear) {
-      return res.status(400).json({ message: "All fields are required" });
+      throw new ApiError(400, "All fields are required");
     }
     
     // Validate admission year
@@ -16,7 +18,7 @@ export async function register(req, res) {
     const admissionYearNum = parseInt(admissionYear);
     
     if (admissionYearNum < 2020 || admissionYearNum > currentYear + 1) {
-      return res.status(400).json({ message: "Please enter a valid admission year" });
+      throw new ApiError(400, "Please enter a valid admission year");
     }
     
     // Calculate graduation year (4-year B.Tech program)
@@ -26,16 +28,16 @@ export async function register(req, res) {
     // Validate email format
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: "Please enter a valid email address" });
+      throw new ApiError(400, "Please enter a valid email address");
     }
     
     // Check if user already exists
     const existing = await User.findOne({ $or: [{ email }, { rollNumber }] });
     if (existing) {
       if (existing.email === email) {
-        return res.status(400).json({ message: "Email already registered" });
+        throw new ApiError(400, "Email already registered");
       } else {
-        return res.status(400).json({ message: "Roll number already registered" });
+        throw new ApiError(400, "Roll number already registered");
       }
     }
     
@@ -55,7 +57,8 @@ export async function register(req, res) {
     });
     
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES || "7d" });
-    res.status(201).json({ 
+    
+    res.status(201).json(new ApiResponse(201, {
       token, 
       user: { 
         id: user._id, 
@@ -67,45 +70,35 @@ export async function register(req, res) {
         admissionYear: user.admissionYear,
         graduationYear: user.graduationYear
       } 
-    });
-  } catch (err) {
-    console.error("Registration error:", err);
-    res.status(500).json({ message: err.message });
-  }
-}
+    }, "User registered successfully"));
+});
 
-export async function login(req, res) {
-  try {
+export const login = catchAsync(async (req, res) => {
     // allow login with email or rollNumber (client sends email field)
     const { email, password } = req.body;
     console.log("Login attempt:", { email, passwordProvided: !!password });
     
-    if (!email || !password) return res.status(400).json({ message: "Missing credentials" });
+    if (!email || !password) throw new ApiError(400, "Missing credentials");
     
     const user = await User.findOne({ $or: [{ email }, { rollNumber: email }] });
-    console.log("User found:", user ? `Yes - ${user.email}` : "No");
     
     if (!user) {
-      console.log("User not found with email or rollNumber:", email);
-      return res.status(400).json({ message: "Invalid credentials - User not found" });
+      throw new ApiError(400, "Invalid credentials - User not found");
     }
     
     const ok = await bcrypt.compare(password, user.passwordHash);
-    console.log("Password match:", ok);
     
     if (!ok) {
-      console.log("Password mismatch for user:", user.email);
-      return res.status(400).json({ message: "Invalid credentials - Wrong password" });
+      throw new ApiError(400, "Invalid credentials - Wrong password");
     }
     
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES || "7d" });
-    console.log("Login successful for:", user.email);
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, section: user.section, role: "student" } });
-  } catch (err) {
-    console.error("Login error:", err);
-    res.status(500).json({ message: err.message });
-  }
-}
+    
+    res.status(200).json(new ApiResponse(200, { 
+      token, 
+      user: { id: user._id, name: user.name, email: user.email, section: user.section, role: "student" } 
+    }, "Login successful"));
+});
 
 export async function me(req, res) {
   try {

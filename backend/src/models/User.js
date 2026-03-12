@@ -45,4 +45,10 @@ const userSchema = new mongoose.Schema({
   achievements: [{ type: mongoose.Schema.Types.ObjectId, ref: "Achievement" }],
 }, { timestamps: true });
 
+// Add Indexes for performance (Leaderboards, Auth checks)
+userSchema.index({ totalPoints: -1 });
+userSchema.index({ email: 1 });
+userSchema.index({ rollNumber: 1 });
+userSchema.index({ year: 1, department: 1, totalPoints: -1 });
+
 export default mongoose.model("User", userSchema);

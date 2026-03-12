@@ -3,8 +3,15 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import mongoSanitize from "express-mongo-sanitize";
+import xss from "xss-clean";
+import hpp from "hpp";
 import path from "path";
 import { fileURLToPath } from "url";
+
+// Custom Middlewares
+import { apiLimiter, authLimiter, adminLimiter } from "./middlewares/rateLimiter.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
+import { logger } from "./utils/logger.js";
 
 import authRoutes from "./routes/auth.routes.js";
 import achievementRoutes from "./routes/achievement.routes.js";
@@ -26,6 +33,19 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
+
+// Data sanitization against XSS
+app.use(xss());
+
+// Prevent HTTP Parameter Pollution
+app.use(hpp({
+  whitelist: [
+    'year', 'department', 'section', 'status' // Allow arrays for these specific query parameters if needed
+  ]
+}));
+
+// Apply Global Rate Limiter
+app.use("/api", apiLimiter);
 
 // CORS configuration for AWS deployment
 const allowedOrigins = [
@@ -67,7 +87,14 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   contentSecurityPolicy: false // Allow content from any source for development
 }));
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// Setup Morgan to use Winston Logger
+const morganFormat = process.env.NODE_ENV === "production" ? "combined" : "dev";
+app.use(morgan(morganFormat, {
+  stream: {
+    write: (message) => logger.info(message.trim())
+  }
+}));
 
 // Serve uploaded files statically with fallback
 // In production (Vercel), serve from /tmp/uploads
@@ -89,9 +116,10 @@ app.use("/uploads", express.static(uploadsPath, {
   maxAge: '1d'
 }));
 
-app.use("/api/auth", authRoutes);
+// Route Definitions
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/achievements", achievementRoutes);
-app.use("/api/admin", adminRoutes);
+app.use("/api/admin", adminLimiter, adminRoutes);
 app.use("/api/erp", erpRoutes);
 app.use("/api/announcements", announcementRoutes);
 app.use("/api/activities", activityRoutes);
@@ -113,10 +141,12 @@ app.get("/", (req, res) => res.json({
   version: "1.0.0"
 }));
 
-// error handler
-app.use((err, req, res, next) => {
-  console.error("Unhandled error:", err);
-  res.status(err.status || 500).json({ message: err.message || "Server error" });
+// Route not found fallback
+app.use((req, res, next) => {
+  next(new Error(`Not Found - ${req.originalUrl}`));
 });
+
+// Centralized error handler
+app.use(errorHandler);
 
 export default app;

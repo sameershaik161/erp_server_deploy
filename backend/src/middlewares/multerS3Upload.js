@@ -23,15 +23,35 @@ const storage = multer.diskStorage({
     cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
-    const safe = file.originalname.replace(/\s+/g, "_");
-    const uniqueName = `${Date.now()}_${Math.random().toString(36).slice(2)}_${safe}`;
+    // Sanitize the file name to avoid directory traversal and execution
+    const safeName = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+    const uniqueName = `${Date.now()}_${Math.random().toString(36).slice(2)}_${safeName}`;
     cb(null, uniqueName);
   }
 });
 
+// File validation filter
+const fileFilter = (req, file, cb) => {
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/jpg",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  ];
+  
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Invalid file type. Only JPEG, PNG, PDF, and DOC files are allowed."), false);
+  }
+};
+
 const upload = multer({
   storage,
-  limits: { fileSize: 20 * 1024 * 1024 } // 20 MB
+  limits: { fileSize: 10 * 1024 * 1024 }, // Reduced to 10 MB for security
+  fileFilter
 });
 
 export default upload;

@@ -47,6 +47,19 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     console.error("❌ API Error:", error.response?.status, error.response?.data || error.message);
+    
+    // Global handling for expired/invalid tokens
+    if (error.response?.status === 401) {
+      console.warn("Unauthorized access - clearing token and state");
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      
+      // Prevent redirect loop if already on login page
+      if (window.location.pathname !== '/skillflux/login' && window.location.pathname !== '/skillflux/') {
+         window.location.href = '/skillflux/login';
+      }
+    }
+    
     return Promise.reject(error);
   }
 );

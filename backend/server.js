@@ -1,33 +1,29 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { validateEnv } from "./src/utils/validateEnv.js";
+import { config, validateConfig } from "./src/config/config.js";
+import { logger } from "./src/utils/logger.js";
 import connectDB from "./config/db.js";
 import app from "./src/app.js";
 
 // Validate environment variables in production
-if (process.env.NODE_ENV === 'production') {
-  validateEnv();
-}
+validateConfig();
 
-// Render deployment: Use PORT from environment or default to 5000
-const PORT = process.env.PORT || 5000;
-const NODE_ENV = process.env.NODE_ENV || 'development';
+const PORT = config.port;
+const NODE_ENV = config.env;
 
-console.log(`🚀 Environment: ${NODE_ENV}`);
-console.log(`📍 Port: ${PORT}`);
+logger.info(`🚀 Starting server in ${NODE_ENV} mode...`);
 
 // Connect to database and start server
 connectDB()
   .then(() => {
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`✅ Server running on port ${PORT}`);
-      console.log(`🌍 Environment: ${NODE_ENV}`);
-      console.log(`🔗 Access: http://localhost:${PORT}`);
+      logger.info(`✅ Server running on port ${PORT}`);
+      logger.info(`🌍 Environment: ${NODE_ENV}`);
     });
   })
   .catch((err) => {
-    console.error("❌ DB connection failed:", err);
+    logger.error(`❌ DB connection failed: ${err.message}`);
     process.exit(1);
   });
 
