@@ -1,5 +1,5 @@
-import { ApiError } from "./ApiError.js";
-import { logger } from "./logger.js";
+import { ApiError } from "../utils/ApiError.js";
+import { logger } from "../utils/logger.js";
 
 const errorHandler = (err, req, res, next) => {
   let error = err;
