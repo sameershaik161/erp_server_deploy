@@ -61,18 +61,23 @@ app.use(cors({
     // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true);
     
-    // In development, allow all origins
-    if (process.env.NODE_ENV === 'development') {
+    // In development or if specifically allowed, allow all origins
+    if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
       return callback(null, true);
     }
     
-    // In production, check against whitelist
-    if (
+    // Robust check for allowed origins
+    const isAllowed = 
       allowedOrigins.includes(origin) ||
       origin.endsWith('.vercel.app') ||
       origin.endsWith('.amazonaws.com') ||
-      origin.endsWith('.onrender.com')
-    ) {
+      origin.endsWith('.onrender.com') ||
+      // Allow private IP ranges for local testing
+      /^http:\/\/(127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(origin) ||
+      // Allow the origin if it matches the current host (for proxy scenarios)
+      (process.env.SERVER_IP && origin.includes(process.env.SERVER_IP));
+
+    if (isAllowed) {
       return callback(null, true);
     }
     
