@@ -104,8 +104,7 @@ app.use(morgan(morganFormat, {
 // Serve uploaded files statically with fallback
 // In production (Vercel), serve from /tmp/uploads
 // In development, serve from local uploads directory
-const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
-const uploadsPath = isProduction ? '/tmp/uploads' : path.join(__dirname, "../uploads");
+const uploadsPath = path.join(__dirname, "../uploads");
 
 // Create uploads directory if it doesn't exist
 import fs from "fs";
