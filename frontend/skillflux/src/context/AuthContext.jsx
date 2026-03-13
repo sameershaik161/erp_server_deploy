@@ -17,12 +17,13 @@ export const AuthProvider = ({ children }) => {
         : { email: identifier, password };
 
       const res = await axios.post(endpoint, payload);
+      const data = res.data.data; // ApiResponse object has a data field
 
-      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("token", data.token);
       localStorage.setItem("role", isAdmin ? "admin" : "student");
 
       setUser({
-        ...res.data[isAdmin ? "admin" : "user"],
+        ...(isAdmin ? data.admin : data.user),
         role: isAdmin ? "admin" : "student",
       });
 

@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Achievement from "../models/Achievement.js";
 import User from "../models/User.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { sendApprovalEmail, sendRejectionEmail } from "../services/emailService.js";
 import { certificateValidator } from "../services/certificateValidation.js";
@@ -25,7 +26,7 @@ export async function adminLogin(req, res) {
     const ok = await bcrypt.compare(password, admin.passwordHash);
     if (!ok) return res.status(401).json({ message: "Invalid" });
     const token = jwt.sign({ id: admin._id }, process.env.ADMIN_JWT_SECRET, { expiresIn: "1d" });
-    res.json({ token, admin: { id: admin._id, username: admin.username } });
+    res.json(new ApiResponse(200, { token, admin: { id: admin._id, username: admin.username } }, "Admin Login successful"));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
