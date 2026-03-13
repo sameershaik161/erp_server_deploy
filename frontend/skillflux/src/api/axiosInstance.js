@@ -5,17 +5,25 @@ import axios from "axios";
 const baseURL = import.meta.env.VITE_API_BASE_URL || "https://skillflux-backend.vercel.app/api";
 console.log("🔧 Axios Base URL:", baseURL);
 
+// Ensure baseURL ends with a trailing slash for correct relative path resolution
+const normalizedBaseURL = baseURL.endsWith('/') ? baseURL : `${baseURL}/`;
+
 const axiosInstance = axios.create({
-  baseURL: baseURL,
+  baseURL: normalizedBaseURL,
   withCredentials: false,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Automatically attach JWT token if available
+// Automatically attach JWT token and fix relative paths
 axiosInstance.interceptors.request.use(
   (config) => {
+    // Strip leading slash from URL if present to ensure it's relative to the baseURL path
+    if (config.url && config.url.startsWith('/')) {
+      config.url = config.url.substring(1);
+    }
+    
     console.log(`📤 API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
     const token = localStorage.getItem("token");
     if (token) {

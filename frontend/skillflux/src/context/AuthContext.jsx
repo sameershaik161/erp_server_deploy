@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
   // 🔹 Login handler (works for student & admin)
   const login = async (identifier, password, isAdmin = false) => {
     try {
-      const endpoint = isAdmin ? "/admin/login" : "/auth/login";
+      const endpoint = isAdmin ? "admin/login" : "auth/login";
       const payload = isAdmin
         ? { username: identifier, password }
         : { email: identifier, password };
@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
       // Refresh user data after login to get current points
       if (!isAdmin) {
         try {
-          const userRes = await axios.get("/auth/me");
+          const userRes = await axios.get("auth/me");
           setUser({
             ...userRes.data,
             role: "student"
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }) => {
   const refreshUser = async () => {
     try {
       console.log("AuthContext: Manually refreshing user data");
-      const res = await axios.get("/auth/me");
+      const res = await axios.get("auth/me");
       console.log("AuthContext: Refreshed user data:", res.data);
       const role = localStorage.getItem("role");
       setUser({ ...res.data, role: role || "student" });
@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }) => {
     const fetchUser = async () => {
       try {
         console.log("AuthContext: Fetching user data from /auth/me");
-        const res = await axios.get("/auth/me");
+        const res = await axios.get("auth/me");
         console.log("AuthContext: Raw response from /auth/me:", res.data);
         console.log("AuthContext: User year field:", res.data?.year);
         console.log("AuthContext: User department field:", res.data?.department);
