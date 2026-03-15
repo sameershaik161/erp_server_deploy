@@ -1171,9 +1171,9 @@ export async function exportStudentsZIP(req, res) {
 
     console.log(`📎 Found ${certificatePromises.length} certificates to include`);
 
-    // Determine uploads path
-    const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
-    const uploadsPath = isProduction ? '/tmp/uploads' : path.join(__dirname, "../../uploads");
+    // Determine uploads path - check VERCEL explicitly, otherwise use local uploads
+    const isVercel = process.env.VERCEL;
+    const uploadsPath = isVercel ? '/tmp/uploads' : path.join(__dirname, "../../uploads");
 
     // Function to add file to archive
     const addFileToArchive = async (certInfo) => {

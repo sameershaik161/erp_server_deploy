@@ -9,8 +9,8 @@ const __dirname = path.dirname(__filename);
  * Get the uploads directory path based on environment
  */
 export function getUploadsPath() {
-  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
-  return isProduction ? '/tmp/uploads' : path.join(__dirname, "../../uploads");
+  const isVercel = process.env.VERCEL;
+  return isVercel ? '/tmp/uploads' : path.join(__dirname, "../../uploads");
 }
 
 /**

@@ -636,6 +636,10 @@ export default function Students() {
   const handleDownloadCertificate = async (achievement) => {
     if (achievement.certificateUrl) {
       window.open(getFileUrl(achievement.certificateUrl), '_blank');
+    } else if (achievement.proofFiles && achievement.proofFiles.length > 0) {
+      achievement.proofFiles.forEach((file, index) => {
+        setTimeout(() => window.open(getFileUrl(file), '_blank'), index * 100);
+      });
     } else {
       toast.error("No certificate available");
     }
@@ -1613,7 +1617,7 @@ export default function Students() {
                                       size="small"
                                       sx={{ backgroundColor: '#E5E7EB', fontWeight: 600 }}
                                     />
-                                    {achievement.certificateUrl && (
+                                    {(achievement.certificateUrl || (achievement.proofFiles && achievement.proofFiles.length > 0)) && (
                                       <Button
                                         size="small"
                                         variant="outlined"

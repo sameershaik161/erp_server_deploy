@@ -70,8 +70,8 @@ router.get("/:filename", authUser, (req, res) => {
     }
     
     // Determine the correct uploads path
-    const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
-    const uploadsPath = isProduction ? '/tmp/uploads' : path.join(__dirname, "../../uploads");
+    const isVercel = process.env.VERCEL;
+    const uploadsPath = isVercel ? '/tmp/uploads' : path.join(__dirname, "../../uploads");
     const filePath = path.join(uploadsPath, filename);
     
     // Check if file exists
@@ -147,8 +147,8 @@ router.get("/:filename", authUser, (req, res) => {
 // Debug route to list available files (admin only)
 router.get("/debug/list", authAdmin, (req, res) => {
   try {
-    const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
-    const uploadsPath = isProduction ? '/tmp/uploads' : path.join(__dirname, "../../uploads");
+    const isVercel = process.env.VERCEL;
+    const uploadsPath = isVercel ? '/tmp/uploads' : path.join(__dirname, "../../uploads");
     
     if (!fs.existsSync(uploadsPath)) {
       return res.json({ 

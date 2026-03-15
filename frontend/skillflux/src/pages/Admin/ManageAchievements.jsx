@@ -96,6 +96,7 @@ export default function ManageAchievements() {
   const downloadFile = async (fileUrl, fileName) => {
     try {
       const response = await fetch(getFileUrl(fileUrl));
+      if (!response.ok) throw new Error("File could not be downloaded");
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -270,7 +271,7 @@ export default function ManageAchievements() {
                         </Typography>
                         <LinearProgress
                           variant="determinate"
-                          value={aiAnalysis[a._id].credibility_score}
+                          value={aiAnalysis[a._id].credibility_score || 0}
                           sx={{ mt: 0.5, height: 8, borderRadius: 1 }}
                           color={aiAnalysis[a._id].credibility_score >= 80 ? "success" : aiAnalysis[a._id].credibility_score >= 60 ? "primary" : "warning"}
                         />

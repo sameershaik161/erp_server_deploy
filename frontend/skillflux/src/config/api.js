@@ -23,9 +23,20 @@ export const getFileUrl = (filePath) => {
   const adminToken = localStorage.getItem('adminToken');
   const studentToken = localStorage.getItem('token');
   const token = adminToken || studentToken;
-  
-  // Build URL with token parameter
-  const baseUrl = `${BACKEND_URL}${filePath}`;
+
+  const normalizedApiBase = API_BASE_URL.endsWith('/')
+    ? API_BASE_URL.slice(0, -1)
+    : API_BASE_URL;
+  const normalizedBackendBase = BACKEND_URL.endsWith('/')
+    ? BACKEND_URL.slice(0, -1)
+    : BACKEND_URL;
+
+  // Prefer serving uploaded files through the API prefix so it works behind
+  // subdirectory proxies (e.g. /skillflux/api) without requiring a separate
+  // nginx rule for /skillflux/uploads.
+  const baseUrl = filePath.startsWith('/uploads/')
+    ? `${normalizedApiBase}${filePath}` // -> .../api/uploads/<filename>
+    : `${normalizedBackendBase}${filePath.startsWith('/') ? '' : '/'}${filePath}`;
   if (token) {
     const separator = baseUrl.includes('?') ? '&' : '?';
     return `${baseUrl}${separator}token=${token}`;

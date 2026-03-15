@@ -8,13 +8,19 @@ import {
   Security, Warning, CheckCircle, Error, ExpandMore, 
   Visibility, Shield, Flag, TrendingUp, Assessment 
 } from '@mui/icons-material';
-import axios from 'axios';
+import axios from '../api/axiosInstance';
 import { toast } from 'react-toastify';
 
 export default function CertificateValidationPanel({ achievement, onValidationComplete }) {
   const [validating, setValidating] = useState(false);
   const [validation, setValidation] = useState(achievement?.validationResult || null);
   const [showDetails, setShowDetails] = useState(false);
+
+  const trustScoreValue = (() => {
+    const n = Number(validation?.trustScore);
+    if (!Number.isFinite(n)) return 0;
+    return Math.max(0, Math.min(100, n));
+  })();
 
   const runValidation = async () => {
     try {
@@ -89,15 +95,15 @@ export default function CertificateValidationPanel({ achievement, onValidationCo
             {/* Trust Score Overview */}
             <Box display="flex" alignItems="center" gap={2} mb={2}>
               <Box display="flex" alignItems="center" gap={1}>
-                {getTrustScoreIcon(validation.trustScore)}
+                {getTrustScoreIcon(trustScoreValue)}
                 <Typography variant="h6">
-                  Trust Score: {validation.trustScore}%
+                  Trust Score: {trustScoreValue}%
                 </Typography>
               </Box>
               <LinearProgress
                 variant="determinate"
-                value={validation.trustScore}
-                color={getTrustScoreColor(validation.trustScore)}
+                value={trustScoreValue}
+                color={getTrustScoreColor(trustScoreValue)}
                 sx={{ flexGrow: 1, height: 8, borderRadius: 4 }}
               />
               <Chip

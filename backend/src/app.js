@@ -104,7 +104,8 @@ app.use(morgan(morganFormat, {
 // Serve uploaded files statically with fallback
 // In production (Vercel), serve from /tmp/uploads
 // In development, serve from local uploads directory
-const uploadsPath = path.join(__dirname, "../uploads");
+const isVercel = process.env.VERCEL;
+const uploadsPath = isVercel ? '/tmp/uploads' : path.join(__dirname, "../uploads");
 
 // Create uploads directory if it doesn't exist
 import fs from "fs";
@@ -127,6 +128,8 @@ app.use("/api/admin", adminLimiter, adminRoutes);
 app.use("/api/erp", erpRoutes);
 app.use("/api/announcements", announcementRoutes);
 app.use("/api/activities", activityRoutes);
+// Serve uploads through the API prefix as well (useful behind subdirectory proxies)
+app.use("/api/uploads", fileRoutes);
 app.use("/uploads", fileRoutes);
 
 // Health check endpoint for AWS
