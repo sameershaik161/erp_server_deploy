@@ -335,9 +335,19 @@ export async function exportApprovedAchievements(req, res) {
         // Ensure we have a valid string
         proofUrl = String(proofUrl);
 
+        const normalizeBaseUrl = (baseUrl) => {
+          if (!baseUrl) return null;
+          const trimmed = String(baseUrl).trim().replace(/\/+$/, "");
+          if (!trimmed) return null;
+          if (/^https?:\/\//i.test(trimmed)) return trimmed;
+          return `http://${trimmed}`;
+        };
+
+        const baseUrl = normalizeBaseUrl(process.env.BASE_URL) || "http://localhost:5000";
+
         const fullUrl = proofUrl.startsWith("http")
           ? proofUrl
-          : `${process.env.BASE_URL || "http://localhost:5000"}${proofUrl}`;
+          : `${baseUrl}${proofUrl.startsWith("/") ? "" : "/"}${proofUrl}`;
 
         try {
           // Log the URL for debugging

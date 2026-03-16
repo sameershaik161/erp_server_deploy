@@ -17,6 +17,10 @@ export default function ManageAchievements() {
   const [analyzingId, setAnalyzingId] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState("All");
 
+  const totalProofFiles = list.reduce((count, achievement) => {
+    return count + (achievement?.proofFiles?.length || 0);
+  }, 0);
+
   const categories = [
     "All",
     "Academic Certifications",
@@ -115,23 +119,29 @@ export default function ManageAchievements() {
 
   const downloadAllFiles = async () => {
     try {
-      if (list.length === 0) {
+      if (totalProofFiles === 0) {
         toast.warning('No achievements to download');
         return;
       }
 
+      let downloadedCount = 0;
+      let achievementsWithFilesCount = 0;
+
       for (const achievement of list) {
         if (achievement.proofFiles && achievement.proofFiles.length > 0) {
+          achievementsWithFilesCount++;
           for (let i = 0; i < achievement.proofFiles.length; i++) {
             const file = achievement.proofFiles[i];
             const fileName = `${achievement.student?.rollNumber}_${achievement.title.replace(/[^a-zA-Z0-9]/g, '_')}_${i + 1}.${file.split('.').pop()}`;
             await downloadFile(file, fileName);
+            downloadedCount++;
             // Add delay to prevent overwhelming the browser
             await new Promise(resolve => setTimeout(resolve, 500));
           }
         }
       }
-      toast.success(`Downloaded files from ${list.length} achievements`);
+
+      toast.success(`Downloaded ${downloadedCount} file(s) from ${achievementsWithFilesCount} achievement(s)`);
     } catch (err) {
       console.error('Bulk download error:', err);
       toast.error('Failed to download all files');
@@ -146,14 +156,14 @@ export default function ManageAchievements() {
           variant="contained" 
           startIcon={<Download />}
           onClick={downloadAllFiles}
-          disabled={list.length === 0}
+          disabled={totalProofFiles === 0}
           sx={{ 
             backgroundColor: '#10B981', 
             '&:hover': { backgroundColor: '#059669' },
             '&:disabled': { backgroundColor: '#D1D5DB' }
           }}
         >
-          Download All Proof Files ({list.filter(a => a.proofFiles?.length > 0).length})
+          Download All Proof Files ({totalProofFiles})
         </Button>
       </Stack>
       

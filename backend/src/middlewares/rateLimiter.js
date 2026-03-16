@@ -6,10 +6,10 @@ const standardMessage = {
   message: "Too many requests from this IP, please try again later."
 };
 
-// Global API Limiter (100 requests per minute)
+// Global API Limiter (500 requests per minute)
 export const apiLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 100, // Limit each IP to 100 requests per `window` (here, per minute)
+  max: 100, // Limit each IP to 500 requests per `window` (here, per minute)
   message: standardMessage,
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers

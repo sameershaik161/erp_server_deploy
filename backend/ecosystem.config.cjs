@@ -2,6 +2,7 @@ module.exports = {
   apps: [
     {
       name: "skillflux-backend",
+      cwd: __dirname,
       script: "./server.js",
       instances: "max", // Utilize all available CPU cores
       exec_mode: "cluster", // Enables clustering for better performance
