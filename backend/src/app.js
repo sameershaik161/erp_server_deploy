@@ -26,6 +26,10 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// If running behind a reverse proxy (e.g., Nginx on Ubuntu), trust the first proxy
+// so req.ip and rate limiting use the real client IP from X-Forwarded-For.
+app.set("trust proxy", 1);
+
 // parse JSON bodies
 app.use(express.json({ limit: '50mb' }));
 // allow form-data (multer handles files)
